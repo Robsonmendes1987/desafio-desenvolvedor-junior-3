@@ -2,14 +2,15 @@
 
 // src/database/migrations/20230608222700-create-user.js
 var { DataTypes } = require("sequelize");
+var { v4: uuidv4 } = require("uuid");
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable("Users", {
+    await queryInterface.createTable("users", {
       id: {
         allowNull: false,
-        autoIncrement: true,
         primaryKey: true,
-        type: DataTypes.UUID
+        type: Sequelize.STRING,
+        defaultValue: () => uuidv4()
       },
       name: {
         allowNull: false,
@@ -18,10 +19,14 @@ module.exports = {
       email: {
         allowNull: false,
         type: Sequelize.STRING
+      },
+      password: {
+        allowNull: false,
+        type: Sequelize.STRING
       }
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable("Users");
+    await queryInterface.dropTable("users");
   }
 };

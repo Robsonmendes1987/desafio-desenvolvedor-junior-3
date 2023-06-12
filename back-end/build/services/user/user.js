@@ -20,34 +20,43 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 // src/services/user/user.ts
 var user_exports = {};
 __export(user_exports, {
-  RegisterUser: () => RegisterUser
+  RegisterUserService: () => RegisterUserService
 });
 module.exports = __toCommonJS(user_exports);
 var import_bcryptjs = require("bcryptjs");
 
 // src/services/errors/user-already-exists-error.ts
-var userAlreadyExistsError = class extends Error {
+var UserAlreadyExistsError = class extends Error {
   constructor() {
     super("Email Already Exist");
   }
 };
 
 // src/services/user/user.ts
-var RegisterUser = class {
+var RegisterUserService = class {
   constructor(usersRepositories) {
     this.usersRepositories = usersRepositories;
-    this.create = async ({ name, email, password }) => {
+    this.create = async ({
+      name,
+      email,
+      password
+    }) => {
       const passwordHash = await (0, import_bcryptjs.hash)(password, 6);
       const userAlreadyExist = await this.usersRepositories.findByEmail(email);
       if (userAlreadyExist) {
-        throw new userAlreadyExistsError();
+        throw new UserAlreadyExistsError();
       }
-      const user = await this.usersRepositories.create({ name, email, password: passwordHash });
+      const user = await this.usersRepositories.create({
+        name,
+        email,
+        password: passwordHash
+      });
+      console.log("CHEGOU", password);
       return { user };
     };
   }
 };
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  RegisterUser
+  RegisterUserService
 });

@@ -1,24 +1,27 @@
-import { Model, INTEGER, STRING, DataTypes, UUID, NUMBER } from "sequelize";
-import db from ".";
-import {randomUUID} from "node:crypto"
-
-
-
+import { Model, STRING, DataTypes } from 'sequelize'
+import { v4 as uuidv4 } from 'uuid'
+import db from '.'
 
 class User extends Model {
-  declare id: string;
-  declare name: string;
-  declare email: string;
-  declare password: string
+  id!: string
+  name!: string
+  email!: string
+  password!: string
+
+  static associate(models: any) {
+    User.hasMany(models.Post, {
+      foreignKey: 'authorId',
+      as: 'post',
+    })
+  }
 }
 
 User.init(
   {
     id: {
-      // allowNull: false,
       primaryKey: true,
-      type: DataTypes.UUIDV4,
-      defaultValue: () => randomUUID(),
+      type: DataTypes.UUID,
+      defaultValue: () => uuidv4(),
     },
     name: {
       allowNull: false,
@@ -36,10 +39,10 @@ User.init(
   {
     underscored: true,
     sequelize: db,
-    modelName: "user",
-    tableName: "users",
+    modelName: 'user',
+    tableName: 'users',
     timestamps: false,
-  }
-);
+  },
+)
 
-export default User;
+export default User

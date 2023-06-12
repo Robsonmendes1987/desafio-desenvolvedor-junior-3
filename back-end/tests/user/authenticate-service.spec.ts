@@ -21,8 +21,8 @@ describe("Authanticate User Service", () => {
     })
     it("Should be able to authenticate", async () => {
         await userRepository.create(await makeFakeUser())
-        const {user} = await sut.authenticate({email: "robson@gmail.com", password: '1234'})
-        expect(user.password).toEqual(expect.any(String))
+        const {token} = await sut.authenticate({email: "robson@gmail.com", password: '1234'})
+        expect(token).toEqual(expect.any(String))
 
     })
 

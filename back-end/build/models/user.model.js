@@ -58,6 +58,7 @@ __export(user_model_exports, {
 });
 module.exports = __toCommonJS(user_model_exports);
 var import_sequelize2 = require("sequelize");
+var import_uuid = require("uuid");
 
 // src/models/index.ts
 var import_sequelize = require("sequelize");
@@ -67,21 +68,29 @@ var models_default = sequelize;
 
 // src/models/user.model.ts
 var User = class extends import_sequelize2.Model {
+  static associate(models) {
+    User.hasMany(models.Post, {
+      foreignKey: "authorId",
+      as: "post"
+    });
+  }
 };
 User.init(
   {
     id: {
-      allowNull: false,
-      autoIncrement: true,
       primaryKey: true,
       type: import_sequelize2.DataTypes.UUID,
-      defaultValue: import_sequelize2.DataTypes.UUID
+      defaultValue: () => (0, import_uuid.v4)()
     },
     name: {
       allowNull: false,
       type: import_sequelize2.STRING
     },
     email: {
+      allowNull: false,
+      type: import_sequelize2.STRING
+    },
+    password: {
       allowNull: false,
       type: import_sequelize2.STRING
     }

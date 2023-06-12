@@ -1,10 +1,10 @@
 import {beforeEach, describe, expect, it} from "vitest"
 import { InMemoryUsersRepositories } from "../in-memory/in-memory-Users-Repository"
-import { RegisterUser } from "../../src/services/user/user"
+import { RegisterUserService } from "../../src/services/user/user"
 import { compare } from "bcryptjs"
 import { userAlreadyExistsError } from "../../src/services/errors/user-already-exists-error"
 let userRepository: InMemoryUsersRepositories
-let sut: RegisterUser
+let sut: RegisterUserService
 
 const fakeUser = {
         name: 'Robson Mendes',
@@ -14,7 +14,7 @@ const fakeUser = {
 describe("Register user service", () => {
     beforeEach(() => {
         userRepository = new InMemoryUsersRepositories()
-        sut = new RegisterUser(userRepository)
+        sut = new RegisterUserService(userRepository)
     })
     it("Should be able to register", async () => {
         const {user} = await sut.create(fakeUser)

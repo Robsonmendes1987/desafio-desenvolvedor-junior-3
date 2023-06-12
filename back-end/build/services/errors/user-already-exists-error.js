@@ -20,15 +20,15 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 // src/services/errors/user-already-exists-error.ts
 var user_already_exists_error_exports = {};
 __export(user_already_exists_error_exports, {
-  userAlreadyExistsError: () => userAlreadyExistsError
+  UserAlreadyExistsError: () => UserAlreadyExistsError
 });
 module.exports = __toCommonJS(user_already_exists_error_exports);
-var userAlreadyExistsError = class extends Error {
+var UserAlreadyExistsError = class extends Error {
   constructor() {
     super("Email Already Exist");
   }
 };
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  userAlreadyExistsError
+  UserAlreadyExistsError
 });

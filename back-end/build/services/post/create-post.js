@@ -36,12 +36,21 @@ var RegisterPost = class {
   constructor(postsRepositories, usersRepositories) {
     this.postsRepositories = postsRepositories;
     this.usersRepositories = usersRepositories;
-    this.create = async ({ authorId, title, content }) => {
-      const findUser = await this.usersRepositories.findById(authorId);
+    this.create = async ({
+      email,
+      title,
+      content
+    }) => {
+      const findUser = await this.usersRepositories.findByEmail(email);
+      console.log("FACTORY CREATE POST", email, title, content);
       if (!findUser) {
         throw new ResourceNotFoundError();
       }
-      const post = await this.postsRepositories.create({ authorId: findUser.id, title, content });
+      const post = await this.postsRepositories.create({
+        authorId: findUser.id,
+        title,
+        content
+      });
       return { post };
     };
   }

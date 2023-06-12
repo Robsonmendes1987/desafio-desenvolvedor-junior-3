@@ -1,30 +1,31 @@
-import { compare } from "bcryptjs";
-import { UserProps, UsersRepositories } from "../../repositories/users-repositories";
-import { invalidCredentialError } from "../errors/invalid-credentials-error";
+import { compare } from 'bcryptjs'
+import { UsersRepositories } from '../../repositories/users-repositories'
+import { InvalidCredentialError } from '../errors/invalid-credentials-error'
+import jwt from '../../utils/jwt.utils'
 
 interface UserResponse {
-    user: UserProps
+  token: string
 }
 
 interface User {
-    email: string;
-    password: string;
+  email: string
+  password: string
 }
 
 export class AuthenticateService {
-    constructor(private readonly usersRepositories: UsersRepositories) {}
+  constructor(private readonly usersRepositories: UsersRepositories) {}
 
-    authenticate =  async ({email, password}: User) : Promise<UserResponse> => {
-        const user = await this.usersRepositories.findByEmail(email)
-        if(!user)  {
-            throw new invalidCredentialError()
-        }
-        const validatePassword = await compare(password, user.password)
-        if(!validatePassword) {
-            throw new invalidCredentialError()
-        }
-
-        return {user}
+  authenticate = async ({ email, password }: User): Promise<UserResponse> => {
+    const user = await this.usersRepositories.findByEmail(email)
+    if (!user) {
+      throw new InvalidCredentialError()
+    }
+    const validatePassword = await compare(password, user.password)
+    if (!validatePassword) {
+      throw new InvalidCredentialError()
     }
 
+    const token = jwt.createToken(email)
+    return { token }
+  }
 }

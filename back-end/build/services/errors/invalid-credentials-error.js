@@ -20,15 +20,15 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 // src/services/errors/invalid-credentials-error.ts
 var invalid_credentials_error_exports = {};
 __export(invalid_credentials_error_exports, {
-  invalidCredentialError: () => invalidCredentialError
+  InvalidCredentialError: () => InvalidCredentialError
 });
 module.exports = __toCommonJS(invalid_credentials_error_exports);
-var invalidCredentialError = class extends Error {
+var InvalidCredentialError = class extends Error {
   constructor() {
     super("Invalid Credential");
   }
 };
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  invalidCredentialError
+  InvalidCredentialError
 });
