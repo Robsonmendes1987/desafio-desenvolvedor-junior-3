@@ -22,11 +22,8 @@ export class SequelizePostRepository implements PostsRepositories {
     return user.dataValues
   }
 
-  async findAll(): Promise<PostResponse[] | null> {
+  async findAll(): Promise<PostResponse[]> {
     const user = await Post.findAll()
-    if (!user) {
-      return null
-    }
     return user
   }
 

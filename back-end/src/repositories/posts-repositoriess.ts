@@ -15,7 +15,7 @@ export interface PostResponse {
 export interface PostsRepositories {
   create(data: PostsProps): Promise<PostResponse>
   findById(id: string): Promise<PostResponse | null>
-  findAll(data: PostsProps): Promise<PostResponse[] | null>
+  findAll(): Promise<PostResponse[]>
   delete(id: string): Promise<void>
   puth(data: PostsProps): Promise<PostResponse | null>
 }
