@@ -16,6 +16,6 @@ export interface PostsRepositories {
   create(data: PostsProps): Promise<PostResponse>
   findById(id: string): Promise<PostResponse | null>
   findAll(): Promise<PostResponse[]>
-  delete(id: string): Promise<void>
+  destroy(id: string): Promise<any>
   puth(data: PostsProps): Promise<PostResponse | null>
 }

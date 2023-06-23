@@ -27,8 +27,20 @@ export class SequelizePostRepository implements PostsRepositories {
     return user
   }
 
-  async delete(id: string): Promise<void> {
-    await Post.findByPk(id)
+  async destroy(id: string): Promise<any> {
+    const user = await Post.findByPk(id)
+
+    if (!user) {
+      return {
+        type: 400,
+        message: 'Nao foi possivel excluir, Post nao encontrado',
+      }
+    }
+    await Post.destroy({ where: { id } })
+    return {
+      type: 204,
+      message: 'Post excluido com sucesso',
+    }
   }
 
   async puth({
