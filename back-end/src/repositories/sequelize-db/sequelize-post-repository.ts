@@ -45,11 +45,6 @@ export class SequelizePostRepository implements PostsRepositories {
   }
 
   async puth(data: PostsPropsId): Promise<any> {
-    // const user = await Post.findByPk(id)
-    // if (!user) {
-    //   throw new ResourceNotFoundError()
-    // }
-    // ({ ...funcionario }, { where: { id } })
     console.log('SEQUELIZE', data)
     const puth = await Post.update({ ...data }, { where: { id: data.id } })
     return puth
@@ -65,15 +60,4 @@ export class SequelizePostRepository implements PostsRepositories {
 
     return dataValues
   }
-
-  // async findPostById({
-  //   id,
-  //   authorId,
-  //   content,
-  //   title,
-  // }: PostsProps): Promise<PostResponse> {
-  //   const dataValues = await Post.findByPk(id)
-
-  //   return { dataValues }
-  // }
 }

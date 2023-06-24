@@ -1,6 +1,5 @@
 import {
   PostsRepositories,
-  //   PostResponse,
   PostsProps,
 } from '../../repositories/posts-repositoriess'
 import { ResourceNotFoundError } from '../errors/resource-not-found.error'
@@ -11,7 +10,6 @@ interface PuthResponsebyId {
 
 interface Iputh {
   id: string
-  //   authorId: string
   title: string
   content: string
 }
@@ -20,7 +18,6 @@ export class PuthPost {
 
   puthpost = async ({
     id,
-    // authorId,
     title,
     content,
   }: Iputh): Promise<PuthResponsebyId> => {
