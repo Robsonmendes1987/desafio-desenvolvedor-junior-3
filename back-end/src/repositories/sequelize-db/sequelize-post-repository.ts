@@ -5,6 +5,7 @@ import {
 } from '../posts-repositoriess'
 
 import Post from '../../models/post.model'
+import { ResourceNotFoundError } from '../../services/errors/resource-not-found.error'
 
 export interface PostsPropsId {
   id: string
@@ -14,12 +15,12 @@ export interface PostsPropsId {
 }
 
 export class SequelizePostRepository implements PostsRepositories {
-  async findById(id: string): Promise<PostResponse | null> {
-    const user = await Post.findByPk(id)
-    if (!user) {
-      return null
+  async findById(id: string): Promise<PostsPropsId> {
+    const result = await Post.findByPk(id)
+    if (!result) {
+      throw new ResourceNotFoundError()
     }
-    return user.dataValues
+    return result
   }
 
   async findAll(): Promise<PostResponse[]> {
@@ -48,10 +49,10 @@ export class SequelizePostRepository implements PostsRepositories {
     authorId,
     title,
     content,
-  }: PostsPropsId): Promise<PostResponse | null> {
-    const user = await Post.findByPk(authorId)
+  }: PostsPropsId): Promise<PostResponse> {
+    const user = await Post.findByPk(id)
     if (!user) {
-      return null
+      throw new ResourceNotFoundError()
     }
     await user.update({ title, content }, { where: { authorId } })
     return user
@@ -67,4 +68,15 @@ export class SequelizePostRepository implements PostsRepositories {
 
     return dataValues
   }
+
+  // async findPostById({
+  //   id,
+  //   authorId,
+  //   content,
+  //   title,
+  // }: PostsProps): Promise<PostResponse> {
+  //   const dataValues = await Post.findByPk(id)
+
+  //   return { dataValues }
+  // }
 }
