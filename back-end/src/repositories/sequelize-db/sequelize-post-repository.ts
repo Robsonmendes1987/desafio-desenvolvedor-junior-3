@@ -44,18 +44,15 @@ export class SequelizePostRepository implements PostsRepositories {
     }
   }
 
-  async puth({
-    id,
-    authorId,
-    title,
-    content,
-  }: PostsPropsId): Promise<PostResponse> {
-    const user = await Post.findByPk(id)
-    if (!user) {
-      throw new ResourceNotFoundError()
-    }
-    await user.update({ title, content }, { where: { authorId } })
-    return user
+  async puth(data: PostsPropsId): Promise<any> {
+    // const user = await Post.findByPk(id)
+    // if (!user) {
+    //   throw new ResourceNotFoundError()
+    // }
+    // ({ ...funcionario }, { where: { id } })
+    console.log('SEQUELIZE', data)
+    const puth = await Post.update({ ...data }, { where: { id: data.id } })
+    return puth
   }
 
   async create({

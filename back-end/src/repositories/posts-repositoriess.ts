@@ -1,6 +1,13 @@
 export interface PostsProps {
   // id: string
-  authorId: string
+  authorId?: string
+  title: string
+  content: string
+}
+
+export interface PostsPropsById {
+  id?: string
+  // authorId: string
   title: string
   content: string
 }
@@ -17,5 +24,5 @@ export interface PostsRepositories {
   findById(id: string): Promise<PostResponse>
   findAll(): Promise<PostResponse[]>
   destroy(id: string): Promise<any>
-  puth(data: PostsProps): Promise<PostResponse>
+  puth(data: PostsPropsById): Promise<PostResponse>
 }
