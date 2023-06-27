@@ -73,7 +73,8 @@ var Post = class extends import_sequelize2.Model {
   static associate(models) {
     Post.belongsTo(models.User, {
       foreignKey: "authorId",
-      as: "author"
+      as: "users",
+      onDelete: "CASCADE"
     });
   }
 };
@@ -85,10 +86,8 @@ Post.init(
       defaultValue: () => (0, import_uuid.v4)()
     },
     authorId: {
-      type: import_sequelize2.DataTypes.STRING,
+      type: import_sequelize2.DataTypes.UUID,
       allowNull: false
-      // onUpdate: 'CASCADE',
-      // onDelete: 'CASCADE',
     },
     title: {
       allowNull: false,
@@ -109,45 +108,53 @@ Post.init(
 );
 var post_model_default = Post;
 
+// src/services/errors/resource-not-found.error.ts
+var ResourceNotFoundError = class extends Error {
+  constructor() {
+    super("Resource Not Found");
+  }
+};
+
 // src/repositories/sequelize-db/sequelize-post-repository.ts
 var SequelizePostRepository = class {
   async findById(id) {
-    const user = await post_model_default.findByPk(id);
-    if (!user) {
-      return null;
+    const result = await post_model_default.findByPk(id);
+    if (!result) {
+      throw new ResourceNotFoundError();
     }
-    return user.dataValues;
+    return result;
   }
   async findAll() {
     const user = await post_model_default.findAll();
-    if (!user) {
-      return null;
-    }
     return user;
   }
-  async delete(id) {
-    await post_model_default.findByPk(id);
-  }
-  async puth({
-    id,
-    authorId,
-    title,
-    content
-  }) {
-    const user = await post_model_default.findByPk(authorId);
+  async destroy(id) {
+    const user = await post_model_default.findByPk(id);
     if (!user) {
-      return null;
+      return {
+        type: 400,
+        message: "Nao foi possivel excluir, Post nao encontrado"
+      };
     }
-    await user.update({ title, content }, { where: { authorId } });
-    return user;
+    await post_model_default.destroy({ where: { id } });
+    return {
+      type: 204,
+      message: "Post excluido com sucesso"
+    };
+  }
+  async puth(data) {
+    console.log("SEQUELIZE", data);
+    const puth = await post_model_default.update({ ...data }, { where: { id: data.id } });
+    return puth;
   }
   async create({
     authorId,
     title,
     content
   }) {
-    console.log("DATAVELUES SEQUELIZE DB", authorId, title, content);
+    console.log("authorid SEQUELIZE DB", authorId);
     const { dataValues } = await post_model_default.create({ authorId, title, content });
+    console.log("DATAVELUES SEQUELIZE DB", dataValues);
     return dataValues;
   }
 };

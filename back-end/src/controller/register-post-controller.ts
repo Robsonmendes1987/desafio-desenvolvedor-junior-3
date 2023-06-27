@@ -15,19 +15,25 @@ export default class RegisterPostController {
     req: Request<object, object, createPost>,
     res: Response,
   ) => {
-    const { title, content } = req.body
+    const { title, content, authorId } = req.body
+    console.log('PEGOU MAKEPOST', authorId)
     const token = req.headers.authorization
     const email = tokenemail(String(token))
 
     try {
       console.log('PEGOU POST', req.body)
       const registerPostCase = MakePost()
-      await registerPostCase.create({ email, title, content })
+      await registerPostCase.create({
+        authorId,
+        email,
+        title,
+        content,
+      })
     } catch (error) {
       if (error instanceof ResourceNotFoundError) {
         return res.status(409).json({ message: error.message })
       }
     }
-    return res.status(201).send()
+    return res.status(201).json({ authorId, content, title })
   }
 }

@@ -51,14 +51,14 @@ var require_database = __commonJS({
   }
 });
 
-// src/services/factory/make-post.ts
-var make_post_exports = {};
-__export(make_post_exports, {
-  MakePost: () => MakePost
+// src/controller/delete-post.ts
+var delete_post_exports = {};
+__export(delete_post_exports, {
+  DeletePostController: () => DeletePostController
 });
-module.exports = __toCommonJS(make_post_exports);
+module.exports = __toCommonJS(delete_post_exports);
 
-// src/models/user.model.ts
+// src/models/post.model.ts
 var import_sequelize2 = require("sequelize");
 var import_uuid = require("uuid");
 
@@ -68,71 +68,8 @@ var config = __toESM(require_database());
 var sequelize = new import_sequelize.Sequelize(config);
 var models_default = sequelize;
 
-// src/models/user.model.ts
-var User = class extends import_sequelize2.Model {
-  static associate(models) {
-    User.hasOne(models.Post, {
-      foreignKey: "authorId",
-      as: "post"
-    });
-  }
-};
-User.init(
-  {
-    id: {
-      primaryKey: true,
-      type: import_sequelize2.DataTypes.UUID,
-      defaultValue: () => (0, import_uuid.v4)()
-    },
-    name: {
-      allowNull: false,
-      type: import_sequelize2.STRING
-    },
-    email: {
-      allowNull: false,
-      type: import_sequelize2.STRING
-    },
-    password: {
-      allowNull: false,
-      type: import_sequelize2.STRING
-    }
-  },
-  {
-    underscored: true,
-    sequelize: models_default,
-    modelName: "user",
-    tableName: "users",
-    timestamps: false
-  }
-);
-var user_model_default = User;
-
-// src/repositories/sequelize-db/sequelize-user-repository.ts
-var SequelizeUserRepository = class {
-  async create({ email, name, password }) {
-    const { dataValues } = await user_model_default.create({ name, email, password });
-    return dataValues;
-  }
-  async findByEmail(email) {
-    const user = await user_model_default.findOne({ where: { email } });
-    if (!user) {
-      return null;
-    }
-    return user.dataValues;
-  }
-  async findById(id) {
-    const user = await user_model_default.findByPk(id);
-    if (!user) {
-      return null;
-    }
-    return user.dataValues;
-  }
-};
-
 // src/models/post.model.ts
-var import_sequelize3 = require("sequelize");
-var import_uuid2 = require("uuid");
-var Post = class extends import_sequelize3.Model {
+var Post = class extends import_sequelize2.Model {
   static associate(models) {
     Post.belongsTo(models.User, {
       foreignKey: "authorId",
@@ -145,20 +82,20 @@ Post.init(
   {
     id: {
       primaryKey: true,
-      type: import_sequelize3.DataTypes.UUID,
-      defaultValue: () => (0, import_uuid2.v4)()
+      type: import_sequelize2.DataTypes.UUID,
+      defaultValue: () => (0, import_uuid.v4)()
     },
     authorId: {
-      type: import_sequelize3.DataTypes.UUID,
+      type: import_sequelize2.DataTypes.UUID,
       allowNull: false
     },
     title: {
       allowNull: false,
-      type: import_sequelize3.STRING
+      type: import_sequelize2.STRING
     },
     content: {
       allowNull: false,
-      type: import_sequelize3.STRING
+      type: import_sequelize2.STRING
     }
   },
   {
@@ -222,42 +159,45 @@ var SequelizePostRepository = class {
   }
 };
 
-// src/services/post/create-post.ts
-var RegisterPost = class {
-  constructor(postsRepositories, usersRepositories) {
+// src/services/post/delete-post.ts
+var DeleteDataPost = class {
+  constructor(postsRepositories) {
     this.postsRepositories = postsRepositories;
-    this.usersRepositories = usersRepositories;
-    this.create = async ({
-      authorId,
-      email,
-      title,
-      content
-    }) => {
-      const findUser = await this.usersRepositories.findByEmail(email);
-      console.log("FACTORY CREATE POST", authorId, email, title, content);
-      console.log("FACTORY FINDUSER", findUser?.id);
-      if (!findUser) {
-        throw new ResourceNotFoundError();
+    this.delete = async ({ id }) => {
+      const findPost = await this.postsRepositories.findById(id);
+      if (!findPost) {
+        return {
+          type: 400,
+          message: "Nao foi possivel excluir, Post nao encontrado"
+        };
       }
-      const post = await this.postsRepositories.create({
-        authorId: findUser?.id,
-        title,
-        content
-      });
-      console.log("FACTORY FINDUSER", authorId);
-      return { post };
+      await this.postsRepositories.destroy(id);
+      return { type: 204, message: "Post Excluido Com Sucesso" };
     };
   }
 };
 
-// src/services/factory/make-post.ts
-function MakePost() {
-  const useRepository = new SequelizeUserRepository();
+// src/services/factory/make-delete-post.ts
+function MakeDeletePost() {
   const postRepository = new SequelizePostRepository();
-  const registerPost = new RegisterPost(postRepository, useRepository);
-  return registerPost;
+  const DeletePost = new DeleteDataPost(postRepository);
+  return DeletePost;
 }
+
+// src/controller/delete-post.ts
+var DeletePostController = class {
+  constructor() {
+    this.deletepost = async (req, res) => {
+      const { id } = req.params;
+      console.log("FACTORY CONTROLLER DELETE POST", id);
+      const deletePost = MakeDeletePost();
+      const { type, message } = await deletePost.delete({ id });
+      console.log("FACTORY CONTROLLER MESSAGE", message);
+      res.status(type).json(message);
+    };
+  }
+};
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  MakePost
+  DeletePostController
 });

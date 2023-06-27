@@ -55,8 +55,16 @@ export class SequelizePostRepository implements PostsRepositories {
     title,
     content,
   }: PostsProps): Promise<PostResponse> {
-    console.log('DATAVELUES SEQUELIZE DB', authorId, title, content)
+    // console.log(
+    //   'authorId, title, content SEQUELIZE DB',
+    //   authorId,
+    //   title,
+    //   content,
+    // )
+    console.log('authorid SEQUELIZE DB', authorId)
+
     const { dataValues } = await Post.create({ authorId, title, content })
+    console.log('DATAVELUES SEQUELIZE DB', dataValues)
 
     return dataValues
   }

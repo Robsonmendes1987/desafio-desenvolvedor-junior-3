@@ -72,7 +72,7 @@ var models_default = sequelize;
 // src/models/user.model.ts
 var User = class extends import_sequelize2.Model {
   static associate(models) {
-    User.hasMany(models.Post, {
+    User.hasOne(models.Post, {
       foreignKey: "authorId",
       as: "post"
     });
@@ -186,7 +186,7 @@ var RegisterUserController = class {
           return res.status(409).json({ message: error.message });
         }
       }
-      return res.status(201).send();
+      return res.status(201).json({ message: "usuario criado com sucesso" });
     };
   }
 };

@@ -71,7 +71,8 @@ var Post = class extends import_sequelize2.Model {
   static associate(models) {
     Post.belongsTo(models.User, {
       foreignKey: "authorId",
-      as: "author"
+      as: "users",
+      onDelete: "CASCADE"
     });
   }
 };
@@ -83,10 +84,8 @@ Post.init(
       defaultValue: () => (0, import_uuid.v4)()
     },
     authorId: {
-      type: import_sequelize2.DataTypes.STRING,
+      type: import_sequelize2.DataTypes.UUID,
       allowNull: false
-      // onUpdate: 'CASCADE',
-      // onDelete: 'CASCADE',
     },
     title: {
       allowNull: false,

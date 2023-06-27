@@ -51,14 +51,14 @@ var require_database = __commonJS({
   }
 });
 
-// src/controller/register-user-controller.ts
-var register_user_controller_exports = {};
-__export(register_user_controller_exports, {
-  default: () => RegisterUserController
+// src/controller/find-post-by-id.ts
+var find_post_by_id_exports = {};
+__export(find_post_by_id_exports, {
+  default: () => FindPostById
 });
-module.exports = __toCommonJS(register_user_controller_exports);
+module.exports = __toCommonJS(find_post_by_id_exports);
 
-// src/models/user.model.ts
+// src/models/post.model.ts
 var import_sequelize2 = require("sequelize");
 var import_uuid = require("uuid");
 
@@ -68,31 +68,32 @@ var config = __toESM(require_database());
 var sequelize = new import_sequelize.Sequelize(config);
 var models_default = sequelize;
 
-// src/models/user.model.ts
-var User = class extends import_sequelize2.Model {
+// src/models/post.model.ts
+var Post = class extends import_sequelize2.Model {
   static associate(models) {
-    User.hasOne(models.Post, {
+    Post.belongsTo(models.User, {
       foreignKey: "authorId",
-      as: "post"
+      as: "users",
+      onDelete: "CASCADE"
     });
   }
 };
-User.init(
+Post.init(
   {
     id: {
       primaryKey: true,
       type: import_sequelize2.DataTypes.UUID,
       defaultValue: () => (0, import_uuid.v4)()
     },
-    name: {
+    authorId: {
+      type: import_sequelize2.DataTypes.UUID,
+      allowNull: false
+    },
+    title: {
       allowNull: false,
       type: import_sequelize2.STRING
     },
-    email: {
-      allowNull: false,
-      type: import_sequelize2.STRING
-    },
-    password: {
+    content: {
       allowNull: false,
       type: import_sequelize2.STRING
     }
@@ -100,92 +101,94 @@ User.init(
   {
     underscored: true,
     sequelize: models_default,
-    modelName: "user",
-    tableName: "users",
+    modelName: "post",
+    tableName: "posts",
     timestamps: false
   }
 );
-var user_model_default = User;
+var post_model_default = Post;
 
-// src/repositories/sequelize-db/sequelize-user-repository.ts
-var SequelizeUserRepository = class {
-  async create({ email, name, password }) {
-    const { dataValues } = await user_model_default.create({ name, email, password });
+// src/services/errors/resource-not-found.error.ts
+var ResourceNotFoundError = class extends Error {
+  constructor() {
+    super("Resource Not Found");
+  }
+};
+
+// src/repositories/sequelize-db/sequelize-post-repository.ts
+var SequelizePostRepository = class {
+  async findById(id) {
+    const result = await post_model_default.findByPk(id);
+    if (!result) {
+      throw new ResourceNotFoundError();
+    }
+    return result;
+  }
+  async findAll() {
+    const user = await post_model_default.findAll();
+    return user;
+  }
+  async destroy(id) {
+    const user = await post_model_default.findByPk(id);
+    if (!user) {
+      return {
+        type: 400,
+        message: "Nao foi possivel excluir, Post nao encontrado"
+      };
+    }
+    await post_model_default.destroy({ where: { id } });
+    return {
+      type: 204,
+      message: "Post excluido com sucesso"
+    };
+  }
+  async puth(data) {
+    console.log("SEQUELIZE", data);
+    const puth = await post_model_default.update({ ...data }, { where: { id: data.id } });
+    return puth;
+  }
+  async create({
+    authorId,
+    title,
+    content
+  }) {
+    console.log("authorid SEQUELIZE DB", authorId);
+    const { dataValues } = await post_model_default.create({ authorId, title, content });
+    console.log("DATAVELUES SEQUELIZE DB", dataValues);
     return dataValues;
   }
-  async findByEmail(email) {
-    const user = await user_model_default.findOne({ where: { email } });
-    if (!user) {
-      return null;
-    }
-    return user.dataValues;
-  }
-  async findById(id) {
-    const user = await user_model_default.findByPk(id);
-    if (!user) {
-      return null;
-    }
-    return user.dataValues;
-  }
 };
 
-// src/services/user/user.ts
-var import_bcryptjs = require("bcryptjs");
-
-// src/services/errors/user-already-exists-error.ts
-var UserAlreadyExistsError = class extends Error {
-  constructor() {
-    super("Email Already Exist");
-  }
-};
-
-// src/services/user/user.ts
-var RegisterUserService = class {
-  constructor(usersRepositories) {
-    this.usersRepositories = usersRepositories;
-    this.create = async ({
-      name,
-      email,
-      password
-    }) => {
-      const passwordHash = await (0, import_bcryptjs.hash)(password, 6);
-      const userAlreadyExist = await this.usersRepositories.findByEmail(email);
-      if (userAlreadyExist) {
-        throw new UserAlreadyExistsError();
+// src/services/post/find-post-by-id.ts
+var FIndByIdPost = class {
+  constructor(postsRepositories) {
+    this.postsRepositories = postsRepositories;
+    this.findPostById = async ({ id }) => {
+      const findPost = await this.postsRepositories.findById(id);
+      if (!findPost) {
+        throw new ResourceNotFoundError();
       }
-      const user = await this.usersRepositories.create({
-        name,
-        email,
-        password: passwordHash
-      });
-      console.log("CHEGOU", password);
-      return { user };
+      return { findPost };
     };
   }
 };
 
-// src/services/factory/make-user.ts
-function MakeUser() {
-  const useRepository = new SequelizeUserRepository();
-  const registerUser = new RegisterUserService(useRepository);
-  return registerUser;
+// src/services/factory/find-post-by-id.ts
+function FindPost() {
+  const postRepository = new SequelizePostRepository();
+  const FindPost2 = new FIndByIdPost(postRepository);
+  return FindPost2;
 }
 
-// src/controller/register-user-controller.ts
-var RegisterUserController = class {
+// src/controller/find-post-by-id.ts
+var FindPostById = class {
   constructor() {
-    this.register = async (req, res) => {
-      const { name, email, password } = req.body;
-      try {
-        console.log("PEGOU", req.body);
-        const registerUseCase = MakeUser();
-        await registerUseCase.create({ email, name, password });
-      } catch (error) {
-        if (error instanceof UserAlreadyExistsError) {
-          return res.status(409).json({ message: error.message });
-        }
-      }
-      return res.status(201).json({ message: "usuario criado com sucesso" });
+    this.findbyid = async (req, res) => {
+      const { id } = req.params;
+      console.log("CONTROLLER FIND POST ID", id);
+      const findPostId = FindPost();
+      const result = await findPostId.findPostById({ id });
+      return res.status(200).json({ result });
     };
   }
 };

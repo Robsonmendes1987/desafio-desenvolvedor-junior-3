@@ -9,7 +9,7 @@ class User extends Model {
   password!: string
 
   static associate(models: any) {
-    User.hasMany(models.Post, {
+    User.hasOne(models.Post, {
       foreignKey: 'authorId',
       as: 'post',
     })

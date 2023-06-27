@@ -1,7 +1,6 @@
 "use strict";
 
 // src/database/migrations/20230608222700-create-user.js
-var { DataTypes } = require("sequelize");
 var { v4: uuidv4 } = require("uuid");
 module.exports = {
   up: async (queryInterface, Sequelize) => {

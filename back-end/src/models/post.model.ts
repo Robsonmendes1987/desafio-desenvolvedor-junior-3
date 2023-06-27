@@ -11,7 +11,8 @@ class Post extends Model {
   static associate(models: any) {
     Post.belongsTo(models.User, {
       foreignKey: 'authorId',
-      as: 'author',
+      as: 'users',
+      onDelete: 'CASCADE',
     })
   }
 }
@@ -24,10 +25,8 @@ Post.init(
       defaultValue: () => uuidv4(),
     },
     authorId: {
-      type: DataTypes.STRING,
+      type: DataTypes.UUID,
       allowNull: false,
-      // onUpdate: 'CASCADE',
-      // onDelete: 'CASCADE',
     },
     title: {
       allowNull: false,

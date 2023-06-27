@@ -1,7 +1,7 @@
-'use strict';
+'use strict'
 
-const { DataTypes } = require("sequelize");
-const { v4: uuidv4 } = require('uuid');
+// const { DataTypes } = require('sequelize')
+const { v4: uuidv4 } = require('uuid')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -23,13 +23,11 @@ module.exports = {
       password: {
         allowNull: false,
         type: Sequelize.STRING,
-      }
+      },
     })
-
   },
 
   down: async (queryInterface, Sequelize) => {
     await queryInterface.dropTable('users')
-
-  }
-};
+  },
+}

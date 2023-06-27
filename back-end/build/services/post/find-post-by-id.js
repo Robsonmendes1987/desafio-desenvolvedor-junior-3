@@ -17,12 +17,12 @@ var __copyProps = (to, from, except, desc) => {
 };
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
-// src/services/post/create-post.ts
-var create_post_exports = {};
-__export(create_post_exports, {
-  RegisterPost: () => RegisterPost
+// src/services/post/find-post-by-id.ts
+var find_post_by_id_exports = {};
+__export(find_post_by_id_exports, {
+  FIndByIdPost: () => FIndByIdPost
 });
-module.exports = __toCommonJS(create_post_exports);
+module.exports = __toCommonJS(find_post_by_id_exports);
 
 // src/services/errors/resource-not-found.error.ts
 var ResourceNotFoundError = class extends Error {
@@ -31,34 +31,20 @@ var ResourceNotFoundError = class extends Error {
   }
 };
 
-// src/services/post/create-post.ts
-var RegisterPost = class {
-  constructor(postsRepositories, usersRepositories) {
+// src/services/post/find-post-by-id.ts
+var FIndByIdPost = class {
+  constructor(postsRepositories) {
     this.postsRepositories = postsRepositories;
-    this.usersRepositories = usersRepositories;
-    this.create = async ({
-      authorId,
-      email,
-      title,
-      content
-    }) => {
-      const findUser = await this.usersRepositories.findByEmail(email);
-      console.log("FACTORY CREATE POST", authorId, email, title, content);
-      console.log("FACTORY FINDUSER", findUser?.id);
-      if (!findUser) {
+    this.findPostById = async ({ id }) => {
+      const findPost = await this.postsRepositories.findById(id);
+      if (!findPost) {
         throw new ResourceNotFoundError();
       }
-      const post = await this.postsRepositories.create({
-        authorId: findUser?.id,
-        title,
-        content
-      });
-      console.log("FACTORY FINDUSER", authorId);
-      return { post };
+      return { findPost };
     };
   }
 };
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  RegisterPost
+  FIndByIdPost
 });

@@ -71,7 +71,7 @@ var models_default = sequelize;
 // src/models/user.model.ts
 var User = class extends import_sequelize2.Model {
   static associate(models) {
-    User.hasMany(models.Post, {
+    User.hasOne(models.Post, {
       foreignKey: "authorId",
       as: "post"
     });

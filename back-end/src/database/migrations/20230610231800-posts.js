@@ -13,10 +13,10 @@ module.exports = {
       },
       authorId: {
         allowNull: false,
-        primaryKey: true,
         type: Sequelize.STRING,
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',
+        field: 'author_id',
         references: {
           // Informa a tabela da referência da associação
           model: 'users',

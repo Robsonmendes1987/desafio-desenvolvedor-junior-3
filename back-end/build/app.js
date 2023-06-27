@@ -75,7 +75,7 @@ var models_default = sequelize;
 // src/models/user.model.ts
 var User = class extends import_sequelize2.Model {
   static associate(models) {
-    User.hasMany(models.Post, {
+    User.hasOne(models.Post, {
       foreignKey: "authorId",
       as: "post"
     });
@@ -189,7 +189,7 @@ var RegisterUserController = class {
           return res.status(409).json({ message: error.message });
         }
       }
-      return res.status(201).send();
+      return res.status(201).json({ message: "usuario criado com sucesso" });
     };
   }
 };
@@ -296,7 +296,8 @@ var Post = class extends import_sequelize3.Model {
   static associate(models) {
     Post.belongsTo(models.User, {
       foreignKey: "authorId",
-      as: "author"
+      as: "users",
+      onDelete: "CASCADE"
     });
   }
 };
@@ -308,10 +309,8 @@ Post.init(
       defaultValue: () => (0, import_uuid2.v4)()
     },
     authorId: {
-      type: import_sequelize3.DataTypes.STRING,
+      type: import_sequelize3.DataTypes.UUID,
       allowNull: false
-      // onUpdate: 'CASCADE',
-      // onDelete: 'CASCADE',
     },
     title: {
       allowNull: false,
@@ -332,53 +331,54 @@ Post.init(
 );
 var post_model_default = Post;
 
+// src/services/errors/resource-not-found.error.ts
+var ResourceNotFoundError = class extends Error {
+  constructor() {
+    super("Resource Not Found");
+  }
+};
+
 // src/repositories/sequelize-db/sequelize-post-repository.ts
 var SequelizePostRepository = class {
   async findById(id) {
-    const user = await post_model_default.findByPk(id);
-    if (!user) {
-      return null;
+    const result = await post_model_default.findByPk(id);
+    if (!result) {
+      throw new ResourceNotFoundError();
     }
-    return user.dataValues;
+    return result;
   }
   async findAll() {
     const user = await post_model_default.findAll();
-    if (!user) {
-      return null;
-    }
     return user;
   }
-  async delete(id) {
-    await post_model_default.findByPk(id);
-  }
-  async puth({
-    id,
-    authorId,
-    title,
-    content
-  }) {
-    const user = await post_model_default.findByPk(authorId);
+  async destroy(id) {
+    const user = await post_model_default.findByPk(id);
     if (!user) {
-      return null;
+      return {
+        type: 400,
+        message: "Nao foi possivel excluir, Post nao encontrado"
+      };
     }
-    await user.update({ title, content }, { where: { authorId } });
-    return user;
+    await post_model_default.destroy({ where: { id } });
+    return {
+      type: 204,
+      message: "Post excluido com sucesso"
+    };
+  }
+  async puth(data) {
+    console.log("SEQUELIZE", data);
+    const puth = await post_model_default.update({ ...data }, { where: { id: data.id } });
+    return puth;
   }
   async create({
     authorId,
     title,
     content
   }) {
-    console.log("DATAVELUES SEQUELIZE DB", authorId, title, content);
+    console.log("authorid SEQUELIZE DB", authorId);
     const { dataValues } = await post_model_default.create({ authorId, title, content });
+    console.log("DATAVELUES SEQUELIZE DB", dataValues);
     return dataValues;
-  }
-};
-
-// src/services/errors/resource-not-found.error.ts
-var ResourceNotFoundError = class extends Error {
-  constructor() {
-    super("Resource Not Found");
   }
 };
 
@@ -388,20 +388,23 @@ var RegisterPost = class {
     this.postsRepositories = postsRepositories;
     this.usersRepositories = usersRepositories;
     this.create = async ({
+      authorId,
       email,
       title,
       content
     }) => {
       const findUser = await this.usersRepositories.findByEmail(email);
-      console.log("FACTORY CREATE POST", email, title, content);
+      console.log("FACTORY CREATE POST", authorId, email, title, content);
+      console.log("FACTORY FINDUSER", findUser?.id);
       if (!findUser) {
         throw new ResourceNotFoundError();
       }
       const post = await this.postsRepositories.create({
-        authorId: findUser.id,
+        authorId: findUser?.id,
         title,
         content
       });
+      console.log("FACTORY FINDUSER", authorId);
       return { post };
     };
   }
@@ -428,19 +431,173 @@ var tokenemail = (token) => {
 var RegisterPostController = class {
   constructor() {
     this.register = async (req, res) => {
-      const { title, content } = req.body;
+      const { title, content, authorId } = req.body;
+      console.log("PEGOU MAKEPOST", authorId);
       const token = req.headers.authorization;
       const email = tokenemail(String(token));
       try {
         console.log("PEGOU POST", req.body);
         const registerPostCase = MakePost();
-        await registerPostCase.create({ email, title, content });
+        await registerPostCase.create({
+          authorId,
+          email,
+          title,
+          content
+        });
       } catch (error) {
         if (error instanceof ResourceNotFoundError) {
           return res.status(409).json({ message: error.message });
         }
       }
-      return res.status(201).send();
+      return res.status(201).json({ authorId, content, title });
+    };
+  }
+};
+
+// src/services/post/find-all-posts.ts
+var FindAllPost = class {
+  constructor(postsRepositories) {
+    this.postsRepositories = postsRepositories;
+    this.findAll = async () => {
+      const findAllPost2 = await this.postsRepositories.findAll();
+      return findAllPost2;
+    };
+  }
+};
+
+// src/services/factory/find-post.ts
+function FindPost() {
+  const postRepository = new SequelizePostRepository();
+  const FindPost3 = new FindAllPost(postRepository);
+  return FindPost3;
+}
+
+// src/controller/find-all-post.ts
+var FindAllPost2 = class {
+  constructor() {
+    this.resultAll = async (req, res) => {
+      console.log("PEGOU POST", req.body);
+      const findAllPostCase = FindPost();
+      const result = await findAllPostCase.findAll();
+      return res.status(201).json(result);
+    };
+  }
+};
+
+// src/services/post/delete-post.ts
+var DeleteDataPost = class {
+  constructor(postsRepositories) {
+    this.postsRepositories = postsRepositories;
+    this.delete = async ({ id }) => {
+      const findPost = await this.postsRepositories.findById(id);
+      if (!findPost) {
+        return {
+          type: 400,
+          message: "Nao foi possivel excluir, Post nao encontrado"
+        };
+      }
+      await this.postsRepositories.destroy(id);
+      return { type: 204, message: "Post Excluido Com Sucesso" };
+    };
+  }
+};
+
+// src/services/factory/make-delete-post.ts
+function MakeDeletePost() {
+  const postRepository = new SequelizePostRepository();
+  const DeletePost = new DeleteDataPost(postRepository);
+  return DeletePost;
+}
+
+// src/controller/delete-post.ts
+var DeletePostController = class {
+  constructor() {
+    this.deletepost = async (req, res) => {
+      const { id } = req.params;
+      console.log("FACTORY CONTROLLER DELETE POST", id);
+      const deletePost2 = MakeDeletePost();
+      const { type, message } = await deletePost2.delete({ id });
+      console.log("FACTORY CONTROLLER MESSAGE", message);
+      res.status(type).json(message);
+    };
+  }
+};
+
+// src/services/post/find-post-by-id.ts
+var FIndByIdPost = class {
+  constructor(postsRepositories) {
+    this.postsRepositories = postsRepositories;
+    this.findPostById = async ({ id }) => {
+      const findPost = await this.postsRepositories.findById(id);
+      if (!findPost) {
+        throw new ResourceNotFoundError();
+      }
+      return { findPost };
+    };
+  }
+};
+
+// src/services/factory/find-post-by-id.ts
+function FindPost2() {
+  const postRepository = new SequelizePostRepository();
+  const FindPost3 = new FIndByIdPost(postRepository);
+  return FindPost3;
+}
+
+// src/controller/find-post-by-id.ts
+var FindPostById = class {
+  constructor() {
+    this.findbyid = async (req, res) => {
+      const { id } = req.params;
+      console.log("CONTROLLER FIND POST ID", id);
+      const findPostId = FindPost2();
+      const result = await findPostId.findPostById({ id });
+      return res.status(200).json({ result });
+    };
+  }
+};
+
+// src/services/post/puth-post.ts
+var PuthPost = class {
+  constructor(postsRepositories) {
+    this.postsRepositories = postsRepositories;
+    this.puthpost = async ({
+      id,
+      title,
+      content
+    }) => {
+      console.log("ID DO POST", id);
+      const findPostById2 = this.postsRepositories.findById(id);
+      if (!findPostById2) {
+        throw new ResourceNotFoundError();
+      }
+      const puth = await this.postsRepositories.puth({
+        id,
+        title,
+        content
+      });
+      return { puth };
+    };
+  }
+};
+
+// src/services/factory/make-puth.ts
+function MakePuthPost() {
+  const postRepository = new SequelizePostRepository();
+  const FindPost3 = new PuthPost(postRepository);
+  return FindPost3;
+}
+
+// src/controller/puth-post.ts
+var PuthPost2 = class {
+  constructor() {
+    this.puth = async (req, res) => {
+      const { id } = req.params;
+      const { content, title } = req.body;
+      console.log("CONTROLLER PUTH POS TBY ID", id);
+      const makePuthPost = MakePuthPost();
+      await makePuthPost.puthpost({ id, content, title });
+      return res.status(201).send("Post Atualizado");
     };
   }
 };
@@ -448,7 +605,15 @@ var RegisterPostController = class {
 // src/routes/post-routes.ts
 var router = import_express2.default.Router();
 var registerPost = new RegisterPostController();
+var findAllPost = new FindAllPost2();
+var deletePost = new DeletePostController();
+var findPostById = new FindPostById();
+var puthPost = new PuthPost2();
+router.put("/puth/:id", async (req, res) => puthPost.puth(req, res));
 router.post("/post", async (req, res) => registerPost.register(req, res));
+router.get("/findbyid/:id", async (req, res) => findPostById.findbyid(req, res));
+router.get("/getallposts", async (req, res) => findAllPost.resultAll(req, res));
+router.delete("/:id", async (req, res) => deletePost.deletepost(req, res));
 var post_routes_default = router;
 
 // src/app.ts

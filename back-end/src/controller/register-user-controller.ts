@@ -23,6 +23,6 @@ export default class RegisterUserController {
         return res.status(409).json({ message: error.message })
       }
     }
-    return res.status(201).send()
+    return res.status(201).json({ message: 'usuario criado com sucesso' })
   }
 }

@@ -1,7 +1,6 @@
 "use strict";
 
-// src/database/migrations/20230610231839-posts.js
-var { DataTypes } = require("sequelize");
+// src/database/migrations/20230610231800-posts.js
 var { v4: uuidv4 } = require("uuid");
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -9,12 +8,12 @@ module.exports = {
       id: {
         allowNull: false,
         primaryKey: true,
-        type: DataTypes.STRING,
+        type: Sequelize.STRING,
         defaultValue: () => uuidv4()
       },
       authorId: {
         allowNull: false,
-        primaryKey: true,
+        // primaryKey: true,
         type: Sequelize.STRING,
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
@@ -22,7 +21,8 @@ module.exports = {
           // Informa a tabela da referência da associação
           model: "users",
           // Informa a coluna da referência que é a chave correspondente
-          key: "id"
+          key: "id",
+          field: "author_id"
         }
       },
       title: {
