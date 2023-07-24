@@ -1,5 +1,5 @@
 export interface PostsProps {
-  // id: string
+  name: string
   authorId?: string
   title: string
   content: string
@@ -13,6 +13,7 @@ export interface PostsPropsById {
 }
 
 export interface PostResponse {
+  name: string
   id: string
   authorId: string
   title: string

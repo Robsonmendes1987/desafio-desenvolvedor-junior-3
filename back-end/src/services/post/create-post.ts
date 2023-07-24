@@ -10,6 +10,7 @@ interface PostResponse {
 }
 
 interface postRequest {
+  name: string
   authorId: string
   email: string
   content: string
@@ -23,23 +24,22 @@ export class RegisterPost {
   ) {}
 
   create = async ({
-    authorId,
     email,
     title,
     content,
   }: postRequest): Promise<PostResponse> => {
     const findUser = await this.usersRepositories.findByEmail(email)
-    console.log('FACTORY CREATE POST', authorId, email, title, content)
+    // console.log('FACTORY CREATE POST', authorId, email, title, content)
     console.log('FACTORY FINDUSER', findUser?.id)
     if (!findUser) {
       throw new ResourceNotFoundError()
     }
     const post = await this.postsRepositories.create({
+      name: findUser.name,
       authorId: findUser?.id,
       title,
       content,
     })
-    console.log('FACTORY FINDUSER', authorId)
 
     return { post }
   }

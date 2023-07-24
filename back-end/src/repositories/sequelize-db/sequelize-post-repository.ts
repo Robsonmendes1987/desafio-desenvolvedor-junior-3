@@ -7,15 +7,16 @@ import {
 import Post from '../../models/post.model'
 import { ResourceNotFoundError } from '../../services/errors/resource-not-found.error'
 
-export interface PostsPropsId {
-  id: string
-  authorId: string
-  title: string
-  content: string
-}
+// export interface PostsPropsId {
+//   name: string
+//   id: string
+//   authorId: string
+//   title: string
+//   content: string
+// }
 
 export class SequelizePostRepository implements PostsRepositories {
-  async findById(id: string): Promise<PostsPropsId> {
+  async findById(id: string): Promise<PostResponse> {
     const result = await Post.findByPk(id)
     if (!result) {
       throw new ResourceNotFoundError()
@@ -44,26 +45,21 @@ export class SequelizePostRepository implements PostsRepositories {
     }
   }
 
-  async puth(data: PostsPropsId): Promise<any> {
+  async puth(data: PostResponse): Promise<any> {
     console.log('SEQUELIZE', data)
     const puth = await Post.update({ ...data }, { where: { id: data.id } })
     return puth
   }
 
   async create({
+    name,
     authorId,
     title,
     content,
   }: PostsProps): Promise<PostResponse> {
-    // console.log(
-    //   'authorId, title, content SEQUELIZE DB',
-    //   authorId,
-    //   title,
-    //   content,
-    // )
     console.log('authorid SEQUELIZE DB', authorId)
 
-    const { dataValues } = await Post.create({ authorId, title, content })
+    const { dataValues } = await Post.create({ name, authorId, title, content })
     console.log('DATAVELUES SEQUELIZE DB', dataValues)
 
     return dataValues

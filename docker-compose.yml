@@ -10,15 +10,17 @@ services:
   #     - 5173:5173
   #   platform: linux/x86_64
   #   networks:
-  #     - b
+  #     - blogs-api-networks
   #   working_dir: /app-frontend
   #   depends_on:
-  #     - back-end
+  #     - backend
 
 
   backend:
     container_name: backend-blog
     build: ./back-end
+    # volumes:
+    #   - ./front-end/src:/app-backend/src
     platform: linux/x86_64
     working_dir: /app-backend
     ports:

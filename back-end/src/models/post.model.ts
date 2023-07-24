@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid'
 import db from '.'
 
 class Post extends Model {
+  name!: string
   id!: string
   authorId!: string
   title!: string
@@ -27,6 +28,10 @@ Post.init(
     authorId: {
       type: DataTypes.UUID,
       allowNull: false,
+    },
+    name: {
+      allowNull: false,
+      type: STRING,
     },
     title: {
       allowNull: false,
