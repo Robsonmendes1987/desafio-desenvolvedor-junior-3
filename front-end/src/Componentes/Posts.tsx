@@ -1,5 +1,7 @@
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useState, useContext, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
 
 import { AppContext } from "../Context/UserProvider";
 import { api } from "../Api/http";
@@ -11,8 +13,8 @@ interface IPosts {
   authorId: string;
   title: string;
   content: string;
-  email: string
-  password: string
+  // email: string
+  // password: string
 }
 
 
@@ -20,8 +22,9 @@ function Posts() {
   const { register, handleSubmit, reset } = useForm();
   const [posts, setPosts] = useState<IPosts[] | []>([]);
   const [modalPost, setModalPost] = useState(false);
-  const { post } = useContext(AppContext);
+  const { post, handleSubmitUser} = useContext(AppContext);
   const [errors, SetErrors] = useState("");
+  const navigate = useNavigate()
 
 
   const AllPosts = async () => {
@@ -29,22 +32,31 @@ function Posts() {
     console.log("POSTS COM NAME", result.data);
     setPosts(result.data);
   };
-  const handleSubmitPost: SubmitHandler<any> = async (email: any, password: any) => {
-    try {
-      const token = await api.post("/authenticate", { email, password });
-      console.log("EMAIL, PASSWORD", email, password);
 
-      localStorage.setItem("token", JSON.stringify(token.data));
-      await api.post("/post");
-    } catch (error: AxiosError | any) {
-      if (error.result.data as AxiosError) {
-        SetErrors(error.result.data)
-      }
-    }
+  interface IUser {
+    email: string
+    password: string
+  }
   
+  const handleSubmitPost: SubmitHandler<IPosts> = async (data: IPosts) => {
+     const x = await handleSubmitUser;
+     if(x){
+
+       await api.post("/post", data);
+       setModalPost(false);
+       reset();
+     } else {
+      console.log("erro")
+     }
+
   };
+  
+
+  
+
 
   useEffect(() => {
+    // handleSubmitUser
     AllPosts;
   });
 
@@ -146,6 +158,7 @@ function Posts() {
                   <button
                     type="submit"
                     className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center text-white bg-blue-700 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-900 hover:bg-blue-800"
+                    // onClick={() => handleSubmitPost}
                   >
                     Publish post
                   </button>

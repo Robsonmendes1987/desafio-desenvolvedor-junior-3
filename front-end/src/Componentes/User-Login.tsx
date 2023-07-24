@@ -3,20 +3,15 @@ import { useForm } from "react-hook-form"
 import { useState, useContext, useEffect } from "react";
 
 import {AppContext} from "../Context/UserProvider"
-import { api } from "../Api/http"
-import { AxiosError } from "axios"
 
-interface IUser {
-  email: string
-  password: string
-}
+
+
 
 function UserLogin() {
   const {handleSubmitUser} = useContext(AppContext)
-  const [errors, SetErrors] = useState("");
-  const { register, handleSubmit, reset } = useForm();
+  const { register, handleSubmit} = useForm();
 
-  console.log("ERRORS", errors);
+
 
   return (
 
