@@ -17,9 +17,10 @@ export default class RegisterPostController {
     res: Response,
   ) => {
     const { name, title, content, authorId } = req.body
-    console.log('PEGOU MAKEPOST', authorId)
     const token = req.headers.authorization
+    console.log('PEGOU MAKEPOST', token)
     const email = tokenemail(String(token))
+    console.log('EMAIL TOKEN', email)
 
     try {
       console.log('PEGOU POST', req.body)

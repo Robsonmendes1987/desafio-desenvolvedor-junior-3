@@ -60,7 +60,7 @@ export function UserProvaider({children}: UserContextProps) {
     }, [])
 
     return(
-        <AppContext.Provider value={{user, post, handleSubmitUser}}>
+        <AppContext.Provider value={{user, post,  handleSubmitUser}}>
             {children}
         </AppContext.Provider>
     )

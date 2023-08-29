@@ -1,6 +1,9 @@
 import { useForm, SubmitHandler } from "react-hook-form";
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect, lazy } from "react";
 import { useNavigate } from "react-router-dom";
+import { ArchiveX} from 'lucide-react'
+
+const DeletPosts = lazy(() => import('../Componentes/DeletPost'));
 
 
 import { AppContext } from "../Context/UserProvider";
@@ -13,7 +16,7 @@ interface IPosts {
   authorId: string;
   title: string;
   content: string;
-  // email: string
+  email: string 
   // password: string
 }
 
@@ -34,39 +37,44 @@ function Posts() {
   };
 
   interface IUser {
-    email: string
+    email: string 
     password: string
   }
   
-  const handleSubmitPost: SubmitHandler<IPosts> = async (data: IPosts) => {
-     const x = await handleSubmitUser;
-     if(x){
+  
 
-       await api.post("/post", data);
-       setModalPost(false);
-       reset();
-     } else {
-      console.log("erro")
-     }
+
+
+  const registersPosts = async (data: IPosts) => {
+    const token = localStorage.getItem("token");
+    
+    const result = JSON.parse(token)
+    console.log('DATA', result)
+
+     await api.post("/post", data, {headers:{Authorization:result.token}})
+     setModalPost(false)
 
   };
   
 
+
+
+
   
 
-
   useEffect(() => {
-    // handleSubmitUser
     AllPosts;
   });
 
   return (
     <div className="w-full h-full">
+        
       {post.map((element) => (
         <div
-          key={element.id} // Certifique-se de fornecer uma chave única para cada elemento em um loop
+          key={element.id} 
           className="max-h-54 w-1/2 mt-2 mx-4 text-gray-900 bg-white rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
         >
+          <DeletPosts/>
           <h1 className="">
             Titulo:
             <p className="mt-1 px-5 mt-0.25 text-sm text-gray-800 bg-white dark:bg-gray-800 focus:ring-0 dark:text-white dark:placeholder-gray-400">
@@ -96,7 +104,7 @@ function Posts() {
         {modalPost ? (
           <div className="fixed inset-0 flex items-center justify-center w-full h-full bg-black bg-opacity-50">
             <div className="w-full h-100 bg-white p-4 rounded-lg shadow-lg dark:bg-gray-800">
-              <form onSubmit={handleSubmit(handleSubmitPost)}>
+              <form onSubmit={handleSubmit(registersPosts)}>
                 <div className="mb-6">
                   <label
                     // htmlFor="text"
@@ -115,6 +123,7 @@ function Posts() {
                   />
                 </div>
                 <div className="mb-6">
+
                   <label
                     htmlFor="text"
                     className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
@@ -123,6 +132,7 @@ function Posts() {
                   </label>
                   <input
                     type="text"
+                    
                     // id="password"
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                     required
@@ -131,7 +141,7 @@ function Posts() {
                 </div>
                 You Post
                 <div className="w-full mb-4 border border-gray-200 rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-                  <div className="w-full mb-4 border border-gray-200 rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
+9                  <div className="w-full mb-4 border border-gray-200 rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
                     <div className="px-4 py-2 bg-white rounded-b-lg dark:bg-gray-800">
                       <label htmlFor="editor" className="sr-only">
                         Publish post
@@ -144,6 +154,7 @@ function Posts() {
                         required
                         {...register("content")}
                       ></textarea>
+                      
                     </div>
                   </div>
                 </div>
